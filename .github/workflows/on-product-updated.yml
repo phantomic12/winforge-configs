@@ -1,0 +1,90 @@
+name: on-product-updated
+
+# Triggered by phantomic12/winforge when config/products.yaml changes
+# upstream. Receives a list of product names that changed; for each one,
+# finds matching profiles in config/profiles/ and triggers a build via
+# repository_dispatch.
+#
+# This is the "auto-build" path: UUP-dump releases a new build → winforge
+# scrapes it → check-updates opens a PR → PR is merged → on-push-products
+# fires this dispatch → this workflow triggers builds for affected profiles.
+
+on:
+  repository_dispatch:
+    types: [product-updated]
+  workflow_dispatch:
+    inputs:
+      products:
+        description: "Comma-separated product names to build (e.g. 'win11-24h2,win11-25h2')"
+        required: true
+        type: string
+
+jobs:
+  resolve-and-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Find profiles whose product matches the dispatch payload
+        id: resolve
+        env:
+          # Triggered by repository_dispatch (products in client_payload.products)
+          # or workflow_dispatch (products in inputs.products). Normalize both.
+          CLIENT_PRODUCTS: ${{ github.event.client_payload.products }}
+          INPUT_PRODUCTS: ${{ inputs.products }}
+        run: |
+          # Pick whichever source has the list
+          if [ -n "$CLIENT_PRODUCTS" ]; then
+            PRODUCTS="$CLIENT_PRODUCTS"
+            SOURCE="repository_dispatch"
+          elif [ -n "$INPUT_PRODUCTS" ]; then
+            PRODUCTS="$INPUT_PRODUCTS"
+            SOURCE="workflow_dispatch"
+          else
+            echo "No products in payload — nothing to do"
+            echo "profiles=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Source: $SOURCE"
+          echo "Products to match: $PRODUCTS"
+          # Read config/profiles/*.yaml and find ones whose 'product' is in the list
+          python3 - << PY
+          import os, yaml
+          from pathlib import Path
+          wanted = set('$PRODUCTS'.split(','))
+          matched = []
+          for f in sorted(Path('config/profiles').glob('*.yaml')):
+              data = yaml.safe_load(f.read_text())
+              product = data.get('product')
+              if product in wanted:
+                  matched.append(f.stem)
+          print(f"Matched profiles: {matched}")
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"profiles={','.join(matched)}\n")
+          PY
+      - name: Trigger builds for each matched profile
+        if: steps.resolve.outputs.profiles != ''
+        env:
+          PROFILES: ${{ steps.resolve.outputs.profiles }}
+        run: |
+          # Trigger one build-request dispatch per profile. They run in parallel
+          # as separate workflow runs so each gets its own artifact + log.
+          for profile in $(echo "$PROFILES" | tr ',' ' '); do
+            echo "Triggering build for profile: $profile"
+            curl -sS -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/json" \
+              "https://api.github.com/repos/${{ github.repository }}/dispatches" \
+              -d "{\"event_type\": \"build-request\", \"client_payload\": {\"profile\": \"$profile\"}}"
+            echo
+          done
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Auto-build summary"
+          echo ""
+          echo "**Trigger:** ${{ github.event_name }} (${{ github.event.action || 'manual' }})"
+          echo ""
+          echo "**Products from dispatch:** ${{ github.event.client_payload.products || '(manual: ' }}${{ inputs.products || '' }}${{ github.event.client_payload.products || ')' }}"
+          echo ""
+          echo "**Matched profiles:** ${{ steps.resolve.outputs.profiles || '(none)' }}"
