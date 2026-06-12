@@ -27,14 +27,23 @@ jobs:
       - name: Find profiles whose product matches the dispatch payload
         id: resolve
         env:
-          # Triggered by repository_dispatch (products in client_payload.products)
-          # or workflow_dispatch (products in inputs.products). Normalize both.
-          CLIENT_PRODUCTS: ${{ github.event.client_payload.products }}
+          # repository_dispatch client_payload.products is a JSON array like
+          # ["win11-24h2", "win11-25h2"]; we normalize it to a comma-separated
+          # string for the shell + Python heredoc.
+          CLIENT_PAYLOAD: ${{ toJson(github.event.client_payload) }}
           INPUT_PRODUCTS: ${{ inputs.products }}
         run: |
-          # Pick whichever source has the list
-          if [ -n "$CLIENT_PRODUCTS" ]; then
-            PRODUCTS="$CLIENT_PRODUCTS"
+          # Pick whichever source has the list, then convert to a comma-separated string
+          if [ -n "$CLIENT_PAYLOAD" ] && [ "$CLIENT_PAYLOAD" != "{}" ] && [ "$CLIENT_PAYLOAD" != "null" ]; then
+            PRODUCTS=$(python3 -c "
+          import json, os
+          payload = json.loads(os.environ['CLIENT_PAYLOAD'])
+          products = payload.get('products', [])
+          if isinstance(products, list):
+              print(','.join(products))
+          else:
+              print(products or '')
+          ")
             SOURCE="repository_dispatch"
           elif [ -n "$INPUT_PRODUCTS" ]; then
             PRODUCTS="$INPUT_PRODUCTS"
