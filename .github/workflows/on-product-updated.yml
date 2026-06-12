@@ -5,9 +5,14 @@ name: on-product-updated
 # finds matching profiles in config/profiles/ and triggers a build via
 # repository_dispatch.
 #
-# This is the "auto-build" path: UUP-dump releases a new build → winforge
-# scrapes it → check-updates opens a PR → PR is merged → on-push-products
-# fires this dispatch → this workflow triggers builds for affected profiles.
+# This is the "auto-build" path: UUP-dump releases a new build -> winforge
+# scrapes it -> check-updates opens a PR -> PR is merged -> on-push-products
+# fires this dispatch -> this workflow triggers builds for affected profiles.
+
+# GITHUB_TOKEN's default permissions are read-only. We need to dispatch
+# build-request events, which requires contents: write.
+permissions:
+  contents: write
 
 on:
   repository_dispatch:
@@ -94,6 +99,11 @@ jobs:
           echo ""
           echo "**Trigger:** ${{ github.event_name }} (${{ github.event.action || 'manual' }})"
           echo ""
-          echo "**Products from dispatch:** ${{ github.event.client_payload.products || '(manual: ' }}${{ inputs.products || '' }}${{ github.event.client_payload.products || ')' }}"
+          # Use toJson to print the array nicely; fall back to manual input
+          if [ -n "${{ github.event.client_payload.products }}" ]; then
+            echo "**Products from dispatch:** ${{ toJson(github.event.client_payload.products) }}"
+          else
+            echo "**Products from dispatch (manual):** ${{ inputs.products }}"
+          fi
           echo ""
           echo "**Matched profiles:** ${{ steps.resolve.outputs.profiles || '(none)' }}"
