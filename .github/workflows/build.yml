@@ -1,0 +1,31 @@
+name: build-windows
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Profile name (from config/profiles/)"
+        required: true
+        type: choice
+        options:
+          - win11-prod
+          - win11-dev
+  # WinForge can also dispatch builds to this repo via the repo_dispatch API:
+  #   gh api repos/phantomic12/winforge-configs/dispatches -f event_type=build-request
+  # ...but in this layout, the check-updates workflow in the winforge repo
+  # can also be configured to call THIS workflow directly. See check-updates
+  # in phantomic12/winforge for details.
+  repository_dispatch:
+    types: [build-request]
+
+# The reusable workflow lives in the winforge repo. This workflow is a thin
+# wrapper that pulls secrets in and calls it. Users of this pattern only
+# need to maintain their own profiles + autounattend — never touch winforge.
+jobs:
+  build:
+    # secrets: inherit forwards every secret from this repo to the called
+    # workflow. Set the secrets on THIS repo (winforge-configs), not on
+    # phantomic12/winforge. WinForge's own repo doesn't need any of them.
+    uses: phantomic12/winforge/.github/workflows/build.yml@v1
+    with:
+      profile: ${{ inputs.profile || github.event.client_payload.profile }}
+    secrets: inherit
