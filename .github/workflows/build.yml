@@ -26,7 +26,7 @@ jobs:
     # workflow. Set the secrets on THIS repo (winforge-configs), not on
     # phantomic12/winforge. WinForge's own repo doesn't need any of them.
     # @v1 for stable releases; switch to @v1.4.0 for pinned patch.
-    uses: win-forge/winforge/.github/workflows/build.yml@v1
+    uses: win-forge/winforge/.github/workflows/build.yml@v1.4.0
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
     secrets: inherit
