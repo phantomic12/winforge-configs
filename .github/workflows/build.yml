@@ -39,4 +39,3 @@ jobs:
       LOCAL_ADMIN_PASS: ${{ secrets.LOCAL_ADMIN_PASS }}
       PRODUCT_KEY: ${{ secrets.PRODUCT_KEY }}
       GOFILE_TOKEN: ${{ secrets.GOFILE_TOKEN }}
-      BYPASS_DLLS_B64: ${{ secrets.BYPASS_DLLS_B64 }}
