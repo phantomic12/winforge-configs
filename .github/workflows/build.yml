@@ -26,7 +26,17 @@ jobs:
     # workflow. Set the secrets on THIS repo (winforge-configs), not on
     # phantomic12/winforge. WinForge's own repo doesn't need any of them.
     # @v1 for stable releases; switch to @v1.4.0 for pinned patch.
+    # Explicit per-secret forwarding — `secrets: inherit` doesn't work for
+    # cross-org reusable workflows (the called workflow is in win-forge/*,
+    # the caller is in phantomic12/*). Set the secrets on the caller repo.
     uses: win-forge/winforge/.github/workflows/build.yml@v1.4.0
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
-    secrets: inherit
+    secrets:
+      RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+      ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
+      LOCAL_ADMIN_NAME: ${{ secrets.LOCAL_ADMIN_NAME }}
+      LOCAL_ADMIN_PASS: ${{ secrets.LOCAL_ADMIN_PASS }}
+      PRODUCT_KEY: ${{ secrets.PRODUCT_KEY }}
+      GOFILE_TOKEN: ${{ secrets.GOFILE_TOKEN }}
+      BYPASS_DLLS_B64: ${{ secrets.BYPASS_DLLS_B64 }}
