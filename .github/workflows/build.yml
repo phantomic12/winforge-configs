@@ -25,8 +25,8 @@ jobs:
     # secrets: inherit forwards every secret from this repo to the called
     # workflow. Set the secrets on THIS repo (winforge-configs), not on
     # phantomic12/winforge. WinForge's own repo doesn't need any of them.
-    # @v1 for stable releases; switch to @v1.2.0 for pinned patch.
-    uses: phantomic12/winforge/.github/workflows/build.yml@v1
+    # @v1 for stable releases; switch to @v1.4.0 for pinned patch.
+    uses: win-forge/winforge/.github/workflows/build.yml@v1
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
     secrets: inherit
