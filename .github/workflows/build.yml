@@ -36,7 +36,7 @@ jobs:
       # the actual code (the @v1.4.1 above is just the workflow file version,
       # not the code that runs). Default is "v1" which is the OLD pre-bypass
       # commit. Always set this to the same tag as the workflow ref.
-      winforge_ref: v1.4.4
+      winforge_ref: v1.4.5
     secrets:
       RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
