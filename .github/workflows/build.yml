@@ -32,6 +32,11 @@ jobs:
     uses: win-forge/winforge/.github/workflows/build.yml@v1.4.1
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
+      # CRITICAL: this is the ref winforge's own build.yml will check out as
+      # the actual code (the @v1.4.1 above is just the workflow file version,
+      # not the code that runs). Default is "v1" which is the OLD pre-bypass
+      # commit. Always set this to the same tag as the workflow ref.
+      winforge_ref: v1.4.1
     secrets:
       RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
