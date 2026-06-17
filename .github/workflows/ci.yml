@@ -1,0 +1,48 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install winforge + dev deps
+        # In caller-mode, .winforge is a real checkout of the tool. For pure
+        # smoke-testing the consumer (this repo) without the UUP dance, just
+        # install the local pytest + pyyaml to run the unit tests in tests/.
+        run: pip install pytest pyyaml lxml requests beautifulsoup4
+
+      - name: Run tests
+        # Currently only test_workflows.py exists; expand as new tests land.
+        run: pytest tests/ -q
+
+      - name: Verify autounattend bypass is the default
+        # The whole point of this repo's recent changes: Win11 products ship
+        # with the LabConfig bypass baked in. Verify that on every Win11
+        # template by checking for the BypassTPMCheck registry command.
+        run: |
+          for f in autounattend/base.xml autounattend/win11-*.xml; do
+            if ! grep -q 'BypassTPMCheck' "$f"; then
+              echo "::error::$f is missing the Win11 bypass (BypassTPMCheck)"
+              exit 1
+            fi
+            echo "✓ $f has Win11 bypass"
+          done
+
+      - name: Verify workflow calls winforge reusable
+        # Sanity check the build.yml wiring so a bad ref or accidental rename
+        # gets caught here, not at 2am when a real build fails.
+        run: |
+          grep -q 'uses: win-forge/winforge/.github/workflows/build.yml' .github/workflows/build.yml \
+            || (echo "::error::build.yml must call win-forge/winforge reusable workflow"; exit 1)
+          echo "✓ build.yml calls win-forge/winforge reusable workflow"
