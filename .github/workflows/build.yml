@@ -35,7 +35,3 @@ jobs:
     secrets:
       RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
-      LOCAL_ADMIN_NAME: ${{ secrets.LOCAL_ADMIN_NAME }}
-      LOCAL_ADMIN_PASS: ${{ secrets.LOCAL_ADMIN_PASS }}
-      PRODUCT_KEY: ${{ secrets.PRODUCT_KEY }}
-      GOFILE_TOKEN: ${{ secrets.GOFILE_TOKEN }}
