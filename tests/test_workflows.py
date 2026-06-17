@@ -13,10 +13,15 @@ WORKFLOWS_DIR = REPO_ROOT / ".github" / "workflows"
 
 
 def test_build_workflow_calls_winforge_reusable():
-    """build.yml must use phantomic12/winforge as a reusable workflow."""
+    """build.yml must use win-forge/winforge as a reusable workflow."""
     text = (WORKFLOWS_DIR / "build.yml").read_text()
-    assert "uses: phantomic12/winforge/" in text
-    assert "secrets: inherit" in text
+    assert "uses: win-forge/winforge/" in text
+    assert "secrets:" in text
+    # Must forward at least RCLONE_CONF + ACCOUNTS_YAML (those are required
+    # by winforge's reusable workflow). Local Admin + Product Key + GoFile
+    # are optional and may be absent in test repos.
+    assert "RCLONE_CONF:" in text
+    assert "ACCOUNTS_YAML:" in text
 
 
 def test_on_product_updated_resolves_profiles():
