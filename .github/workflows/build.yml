@@ -9,11 +9,10 @@ on:
         options:
           - win11-prod
           - win11-dev
-  # WinForge can also dispatch builds to this repo via the repo_dispatch API:
-  #   gh api repos/phantomic12/winforge-configs/dispatches -f event_type=build-request
-  # ...but in this layout, the check-updates workflow in the winforge repo
-  # can also be configured to call THIS workflow directly. See check-updates
-  # in phantomic12/winforge for details.
+          - win11-ent
+          - win11-ltsc
+          - win11-min
+          - win10-legacy
   repository_dispatch:
     types: [build-request]
 
@@ -22,21 +21,11 @@ on:
 # need to maintain their own profiles + autounattend — never touch winforge.
 jobs:
   build:
-    # secrets: inherit forwards every secret from this repo to the called
-    # workflow. Set the secrets on THIS repo (winforge-configs), not on
-    # phantomic12/winforge. WinForge's own repo doesn't need any of them.
-    # @v1 for stable releases; switch to @v1.4.0 for pinned patch.
-    # Explicit per-secret forwarding — `secrets: inherit` doesn't work for
-    # cross-org reusable workflows (the called workflow is in win-forge/*,
-    # the caller is in phantomic12/*). Set the secrets on the caller repo.
-    uses: win-forge/winforge/.github/workflows/build.yml@v1.4.1
+    uses: win-forge/winforge/.github/workflows/build.yml@v1.5.0
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
-      # CRITICAL: this is the ref winforge's own build.yml will check out as
-      # the actual code (the @v1.4.1 above is just the workflow file version,
-      # not the code that runs). Default is "v1" which is the OLD pre-bypass
-      # commit. Always set this to the same tag as the workflow ref.
-      winforge_ref: v1.4.5
+      winforge_ref: v1.5.0
     secrets:
       RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
+      GOFILE_TOKEN: ${{ secrets.GOFILE_TOKEN }}
