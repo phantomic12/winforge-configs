@@ -1,0 +1,8 @@
+# Windows 10 IoT Enterprise LTSC 2021 (build 19044).
+# LTSC = no bloatware, no feature updates, 10-year support cycle.
+# iotenterprise edition gives LTSC features (no Store, no Cortana).
+product: win10-22h2
+edition: iotenterprise
+language: en-us
+compression: esd
+label: win10-ltsc
