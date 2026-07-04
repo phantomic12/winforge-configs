@@ -3,10 +3,11 @@
 # UUP-dump doesn't accept 'iotenterprise' as direct edition param —
 # use 'professional' as base; IoT Enterprise is included as additional
 # WIM index. Select it during Windows Setup.
+# compression: wim (not esd) — RST driver injection expects install.wim.
 product: win10-22h2
 edition: professional
 language: en-us
-compression: esd
+compression: wim
 label: win10-ltsc
 uup_uuid: "1f41c0e5-e142-4636-ba48-e333cf9f14dc"
 uup_title: "Feature update to Windows 10, version 21H2 (19044.6575) amd64"
