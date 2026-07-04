@@ -6,3 +6,5 @@ edition: iotenterprise
 language: en-us
 compression: esd
 label: win10-ltsc
+uup_uuid: "1f41c0e5-e142-4636-ba48-e333cf9f14dc"
+uup_title: "Feature update to Windows 10, version 21H2 (19044.6575) amd64"
