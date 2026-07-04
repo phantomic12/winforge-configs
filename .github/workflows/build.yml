@@ -22,10 +22,10 @@ on:
 # need to maintain their own profiles + autounattend — never touch winforge.
 jobs:
   build:
-    uses: win-forge/winforge/.github/workflows/build.yml@v1.5.0
+    uses: win-forge/winforge/.github/workflows/build.yml@main
     with:
       profile: ${{ inputs.profile || github.event.client_payload.profile }}
-      winforge_ref: v1.5.0
+      winforge_ref: main
     secrets:
       RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
