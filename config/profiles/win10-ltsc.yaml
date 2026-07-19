@@ -1,11 +1,9 @@
-# Windows 10 IoT Enterprise LTSC 2021 (build 19044).
+# Windows 10 Enterprise LTSC 2021 (build 19044).
 # LTSC = no bloatware, no feature updates, 10-year support cycle.
-# UUP-dump doesn't accept 'iotenterprise' as direct edition param —
-# use 'professional' as base; IoT Enterprise is included as additional
-# WIM index. Select it during Windows Setup.
+# Builds Enterprise LTSC directly (not IoT Enterprise via professional WIM).
 # compression: wim (not esd) — RST driver injection expects install.wim.
 product: win10-22h2
-edition: professional
+edition: enterprise
 language: en-us
 compression: wim
 label: win10-ltsc

@@ -42,8 +42,11 @@ $EDITOR config/profiles/win11-prod.yaml
 # 4. Edit autounattend/<product>.xml — add {{LOCAL_ADMIN_NAME}},
 #    {{LOCAL_ADMIN_PASS}}, {{COMPUTER_NAME}}, {{PRODUCT_KEY}} placeholders
 
-# 5. Trigger a build
+# 5. Trigger a build (single profile)
 gh workflow run build.yml -R myorg/my-winforge-configs -f profile=win11-prod
+
+# 6. Or trigger all profiles at once (parallel matrix build)
+gh workflow run build-all.yml -R myorg/my-winforge-configs
 ```
 
 ## Required secrets
@@ -71,11 +74,11 @@ winforge-configs/
 │   ├── products.yaml            # product URLs + latest UUP UUIDs
 │   └── profiles/
 │       ├── win11-prod.yaml      # production build (most users start here)
-│       ├── win11-dev.yaml       # dev channel
 │       ├── win11-ent.yaml       # enterprise edition
 │       ├── win11-ltsc.yaml      # LTSC edition
 │       ├── win11-min.yaml       # debloated minimum
-│       └── win10-legacy.yaml    # Windows 10 22H2
+│       ├── win10-legacy.yaml    # Windows 10 22H2 Pro
+│       └── win10-ltsc.yaml      # Windows 10 Enterprise LTSC 2021
 └── autounattend/
     ├── base.xml                 # generic OOBE-skip template
     ├── oobe-skip.xml            # minimal — no placeholders

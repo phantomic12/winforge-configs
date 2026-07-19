@@ -13,15 +13,29 @@ WORKFLOWS_DIR = REPO_ROOT / ".github" / "workflows"
 
 
 def test_build_workflow_calls_winforge_reusable():
-    """build.yml must use win-forge/winforge as a reusable workflow."""
-    text = (WORKFLOWS_DIR / "build.yml").read_text()
-    assert "uses: win-forge/winforge/" in text
-    assert "secrets:" in text
-    # Must forward at least RCLONE_CONF + ACCOUNTS_YAML (those are required
-    # by winforge's reusable workflow). Local Admin + Product Key + GoFile
-    # are optional and may be absent in test repos.
-    assert "RCLONE_CONF:" in text
-    assert "ACCOUNTS_YAML:" in text
+    """build.yml and build-all.yml must use win-forge/winforge as a reusable workflow."""
+    for wf in ["build.yml", "build-all.yml"]:
+        text = (WORKFLOWS_DIR / wf).read_text()
+        assert "uses: win-forge/winforge/" in text, f"{wf} missing winforge reusable call"
+        assert "secrets:" in text, f"{wf} missing secrets forwarding"
+        # Must forward at least RCLONE_CONF + ACCOUNTS_YAML (those are required
+        # by winforge's reusable workflow). Local Admin + Product Key + GoFile
+        # are optional and may be absent in test repos.
+        assert "RCLONE_CONF:" in text, f"{wf} missing RCLONE_CONF"
+        assert "ACCOUNTS_YAML:" in text, f"{wf} missing ACCOUNTS_YAML"
+
+
+def test_build_all_has_matrix():
+    """build-all.yml must use a matrix strategy with all six profiles."""
+    data = yaml.safe_load((WORKFLOWS_DIR / "build-all.yml").read_text())
+    jobs = data.get("jobs", {})
+    build_job = jobs.get("build", {})
+    strategy = build_job.get("strategy", {})
+    matrix = strategy.get("matrix", {})
+    profiles = matrix.get("profile", [])
+    expected = {"win11-prod", "win11-ent", "win11-ltsc", "win11-min", "win10-legacy", "win10-ltsc"}
+    assert set(profiles) == expected, f"build-all matrix missing profiles: {expected - set(profiles)}"
+    assert strategy.get("fail-fast") == False, "build-all should set fail-fast: false"
 
 
 def test_on_product_updated_resolves_profiles():

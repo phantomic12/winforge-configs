@@ -1,0 +1,26 @@
+name: build-all
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - win11-prod
+          - win11-ent
+          - win11-ltsc
+          - win11-min
+          - win10-legacy
+          - win10-ltsc
+    name: ${{ matrix.profile }}
+    uses: win-forge/winforge/.github/workflows/build.yml@main
+    with:
+      profile: ${{ matrix.profile }}
+      winforge_ref: main
+    secrets:
+      RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+      ACCOUNTS_YAML: ${{ secrets.ACCOUNTS_YAML }}
+      GOFILE_TOKEN: ${{ secrets.GOFILE_TOKEN }}
